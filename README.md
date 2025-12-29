@@ -1,2 +1,197 @@
-# DNT-YT 
-DNT-YT(It means `Do Not Track me, YouTube`) is the offline YouTube cache player
+# DNT-YT
+
+DNT-YT is a lightweight YouTube caching + offline browsing API.
+
+Inspired by [**Piped**](https://github.com/TeamPiped/Piped) and [**Invidious**](https://github.com/iv-org/invidious). However, their goals and typical use-cases differ from what I need, so I created **DNT-YT**.
+
+**DNT-YT prioritizes offline YouTube video exploration above everything else.** In fact, this is the only purpose of the source code in this repository.
+
+## What it does
+
+* Accepts various YouTube URL formats (or a raw `video_id`)
+* Automatically requests caching when missing
+* Stores cached media (video/audio) and serves them as browser-playable URLs
+* Serves an HTML watch page that:
+
+  * polls cache status every 5 seconds when not ready
+  * auto-plays video (muted) once ready
+  * uses a **Mute/Unmute toggle** as the user gesture to enable audio
+  * keeps A/V synchronized in the browser (no ffmpeg)
+
+## Architecture
+
+* **API**: FastAPI
+* **Queue**: RQ
+* **Storage/State**: Redis (jobs/status) + local media volume
+* **Downloader**: yt-dlp (downloads audio/video separately; no ffmpeg required)
+
+## Endpoints
+
+### Watch (HTML)
+
+These routes render the HTML player page.
+If the cache is missing, the server should enqueue a caching job automatically, then the page waits/polls until the cache becomes ready.
+
+#### 1) Root `/<video_id>`
+
+```text
+/ DJgGTnHP0dY
+```
+
+#### 2) Path-based watch
+
+```text
+/watch/DJgGTnHP0dY
+```
+
+#### 3) Query `v=<video_id>` (YouTube-like)
+
+```text
+/watch?v=DJgGTnHP0dY
+```
+
+#### 4) Query `url=<full-youtube-url>`
+
+```text
+/watch?url=https://www.youtube.com/watch?v=DJgGTnHP0dY
+```
+
+### API (JSON)
+
+#### Request caching / play intent
+
+Queues a cache job if missing.
+
+```text
+GET /v1/yt/play?url=<youtube_url>
+```
+
+Example:
+
+```bash
+curl "http://localhost:58000/v1/yt/play?url=https://www.youtube.com/watch?v=DJgGTnHP0dY"
+```
+
+Typical response:
+
+```json
+{
+  "ok": true,
+  "ready": false,
+  "video_id": "DJgGTnHP0dY",
+  "job_id": "..."
+}
+```
+
+#### Cache status
+
+Returns whether cache is ready and (when ready) URLs for cached media.
+
+```text
+GET /v1/yt/status?video_id=<video_id>
+```
+
+Example:
+
+```bash
+curl "http://localhost:58000/v1/yt/status?video_id=DJgGTnHP0dY"
+```
+
+Typical response:
+
+```json
+{
+  "ok": true,
+  "ready": true,
+  "video_id": "DJgGTnHP0dY",
+  "video_url": "/media/DJgGTnHP0dY/video.mp4",
+  "audio_url": "/media/DJgGTnHP0dY/audio.m4a"
+}
+```
+
+---
+
+### Media (cached files)
+
+These URLs are browser-playable once caching completes.
+
+```text
+GET /media/<video_id>/video.mp4
+GET /media/<video_id>/audio.m4a
+```
+
+Example:
+
+```text
+/media/DJgGTnHP0dY/video.mp4
+/media/DJgGTnHP0dY/audio.m4a
+```
+
+## Content negotiation (HTML vs JSON)
+
+DNT-YT can decide response format based on request headers. Typical behavior:
+
+* If the client requests `text/html`, return the watch page
+* If the client requests `application/json`, return JSON (status or play response)
+* (Optional) `oEmbed` / OpenGraph can be added for social previews
+
+> Note: exact negotiation rules depend on your current `main.py` implementation.
+> The README reflects the intended behavior discussed so far.
+
+## Playback model (no ffmpeg)
+
+DNT-YT downloads **audio and video separately** using yt-dlp and serves them as separate files.
+
+The watch page:
+
+* starts video playback automatically (usually requires `muted` for autoplay)
+* uses a **Mute/Unmute toggle** button as the explicit user action to enable audio reliably
+* keeps audio aligned to video time (periodic drift correction and seek sync)
+
+This avoids any server-side muxing/merging and therefore avoids ffmpeg.
+
+## Dependencies
+
+* **yt-dlp** (required)
+* Redis
+* FastAPI / Uvicorn
+* RQ
+
+## Quick start (Docker)
+
+> Replace this section with your exact compose / Docker instructions if needed.
+> (I can generate a fully accurate section once you paste your current docker-compose.yml and Dockerfiles.)
+
+Typical:
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+* Watch page: `http://localhost:58000/DJgGTnHP0dY`
+* API: `http://localhost:58000/v1/yt/play?url=...`
+
+## Goals / non-goals
+
+**Goals**
+
+* Offline-first YouTube exploration
+* Simple caching API
+* Browser-playable cached URLs
+* Minimal server-side processing (no ffmpeg)
+
+**Non-goals**
+
+* Full UI like a Piped or Invidious
+* Account features / subscriptions / comments
+* Complex transcoding pipelines
+
+## Join the community
+I am always open. Collaboration, opportunities, and community activities are all welcome.
+
+* ActivityPub [@catswords_oss@catswords.social](https://catswords.social/@catswords_oss?utm_source=gnh1201)
+* XMPP [catswords@conference.omemo.id](xmpp:catswords@conference.omemo.id?join)
+* [Join Catswords OSS on Microsoft Teams (teams.live.com)](https://teams.live.com/l/community/FEACHncAhq8ldnojAI?utm_source=gnh1201)
+* [Join Catswords OSS #welsonjs on Discord (discord.gg)](https://discord.gg/XKG5CjtXEj?utm_source=gnh1201)
