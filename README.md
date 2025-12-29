@@ -135,9 +135,6 @@ DNT-YT can decide response format based on request headers. Typical behavior:
 * If the client requests `application/json`, return JSON (status or play response)
 * (Optional) `oEmbed` / OpenGraph can be added for social previews
 
-> Note: exact negotiation rules depend on your current `main.py` implementation.
-> The README reflects the intended behavior discussed so far.
-
 ## Playback model (no ffmpeg)
 
 DNT-YT downloads **audio and video separately** using yt-dlp and serves them as separate files.
@@ -158,9 +155,6 @@ This avoids any server-side muxing/merging and therefore avoids ffmpeg.
 * RQ
 
 ## Quick start (Docker)
-
-> Replace this section with your exact compose / Docker instructions if needed.
-> (I can generate a fully accurate section once you paste your current docker-compose.yml and Dockerfiles.)
 
 Typical:
 
