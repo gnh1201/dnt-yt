@@ -1,0 +1,49 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    build: .
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - PUBLIC_BASE_URL=https://dnt-yt.catswords.net
+      - MEDIA_ROOT=/data
+      - LOG_LEVEL=INFO
+      - QUEUE_NAME=yt
+      - JOB_TTL_SECONDS=21600
+      - YTDLP_PLAYER_CLIENT=ios,tv
+      - YTDLP_FORCE_IPV4=1
+      - YTDLP_VERBOSE=1
+      - YTDLP_DEBUG=1
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "58000:8000"
+    volumes:
+      - media_data:/data
+    depends_on:
+      - redis
+
+  worker:
+    build: .
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - MEDIA_ROOT=/data
+      - LOG_LEVEL=INFO
+      - QUEUE_NAME=yt
+      - JOB_TTL_SECONDS=21600
+      - YTDLP_PLAYER_CLIENT=ios,tv
+      - YTDLP_FORCE_IPV4=1
+      - YTDLP_VERBOSE=1
+      - YTDLP_DEBUG=1
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - redis
+    volumes:
+      - media_data:/data
+    command: ["python", "-m", "worker.worker"]
+
+volumes:
+  media_data:
+

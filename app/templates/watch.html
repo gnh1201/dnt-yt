@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YT Cache Player · {{ video_id }}</title>
+
+  <style>
+  {% raw %}
+  :root {
+    --bg: #0b1020;
+    --panel: rgba(255,255,255,0.06);
+    --stroke: rgba(255,255,255,0.12);
+    --text: rgba(255,255,255,0.92);
+    --muted: rgba(255,255,255,0.65);
+    --good: #3ddc97;
+    --warn: #f7c948;
+    --bad: #ff5c7a;
+    --radius: 18px;
+    --shadow: 0 18px 60px rgba(0,0,0,0.45);
+    --btn: rgba(255,255,255,0.10);
+    --btn-hover: rgba(255,255,255,0.16);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    color: var(--text);
+    background:
+      radial-gradient(1000px 600px at 20% 10%, rgba(61,220,151,0.10), transparent 60%),
+      radial-gradient(900px 520px at 80% 0%, rgba(93,162,255,0.12), transparent 60%),
+      radial-gradient(700px 520px at 60% 100%, rgba(255,92,122,0.10), transparent 60%),
+      var(--bg);
+  }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 28px 18px 48px;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .pill {
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 70vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--warn);
+  }
+  .dot.good { background: var(--good); }
+  .dot.bad  { background: var(--bad); }
+
+  .card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .player {
+    position: relative;
+    background: #000;
+    aspect-ratio: 16 / 9;
+  }
+
+  video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000;
+  }
+
+  .waiting {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: #111;
+    z-index: 3;
+  }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 4px solid #e5e5e5;
+    border-top-color: #111;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 12px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .controls {
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .btns {
+    display: inline-flex;
+    gap: 8px;
+  }
+
+  button {
+    border: 1px solid rgba(255,255,255,0.14);
+    background: var(--btn);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button:hover { background: var(--btn-hover); }
+  button.secondary { background: transparent; }
+
+  {% endraw %}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="pill">video_id: {{ video_id }}</div>
+      <div class="badge">
+        <span class="dot" id="dot"></span>
+        <span id="badgeText">Checking cache…</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="player">
+        <video id="video" controls playsinline preload="auto" style="display:none"></video>
+
+        <div class="waiting" id="waiting">
+          <div style="text-align:center">
+            <div class="spinner"></div>
+            <div id="statusLine">Preparing cache…</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <!-- LEFT: buttons -->
+        <div class="btns">
+          <button id="btnPlay">▶ Play</button>
+          <button class="secondary" id="btnPause">⏸ Pause</button>
+          <button class="secondary" id="btnMute">🔇 Muted</button>
+        </div>
+
+        <!-- RIGHT: status -->
+        <div class="pill" id="statusRight">status: initializing</div>
+      </div>
+    </div>
+
+    <audio id="audio" preload="auto"></audio>
+  </div>
+
+  <script>
+    const VIDEO_ID = {{ video_id | tojson }};
+  </script>
+
+  <script>
+  {% raw %}
+  const POLL_MS = 5000;
+  const DRIFT = 0.25;
+
+  const v = document.getElementById("video");
+  const a = document.getElementById("audio");
+  const waiting = document.getElementById("waiting");
+  const statusLine = document.getElementById("statusLine");
+  const statusRight = document.getElementById("statusRight");
+  const badgeText = document.getElementById("badgeText");
+  const dot = document.getElementById("dot");
+
+  const btnPlay = document.getElementById("btnPlay");
+  const btnPause = document.getElementById("btnPause");
+  const btnMute = document.getElementById("btnMute");
+
+  let ready = false;
+  let timer = null;
+  let audioEnabled = false; // user-controlled via toggle button only
+
+  function setStatus(s) {
+    statusRight.textContent = "status: " + s;
+  }
+
+  function setBadge(text, ok=false) {
+    badgeText.textContent = text;
+    dot.classList.toggle("good", ok);
+  }
+
+  function setWaitingText(t) {
+    statusLine.textContent = t;
+  }
+
+  function updateMuteButton() {
+    if (audioEnabled) {
+      btnMute.textContent = "🔊 Unmuted";
+      btnMute.classList.remove("secondary");
+    } else {
+      btnMute.textContent = "🔇 Muted";
+      btnMute.classList.add("secondary");
+    }
+  }
+
+  async function fetchStatus() {
+    const r = await fetch(`/v1/yt/status?video_id=${encodeURIComponent(VIDEO_ID)}`);
+    return await r.json();
+  }
+
+  function attach(vu, au) {
+    if (v.src !== vu) v.src = vu;
+    if (a.src !== au) a.src = au;
+  }
+
+  function sync() {
+    if (!audioEnabled) return;
+    if (Math.abs(v.currentTime - a.currentTime) > DRIFT) {
+      a.currentTime = v.currentTime;
+    }
+  }
+
+  async function ensureVideoPlays() {
+    if (!ready) return;
+    try { await v.play(); } catch {}
+  }
+
+  async function startAudioIfEnabled() {
+    if (!ready) return;
+    if (!audioEnabled) { try { a.pause(); } catch {} return; }
+
+    a.currentTime = v.currentTime;
+    try { await a.play(); } catch {}
+  }
+
+  async function applyAudioState() {
+    updateMuteButton();
+    await startAudioIfEnabled();
+  }
+
+  async function checkOnce() {
+    const s = await fetchStatus();
+
+    if (s && s.ready) {
+      ready = true;
+      attach(s.video_url, s.audio_url);
+
+      waiting.style.display = "none";
+      v.style.display = "block";
+
+      setBadge("Cache ready", true);
+      setStatus("ready");
+
+      // auto-play video on ready
+      await ensureVideoPlays();
+
+      // keep audio muted by default until user toggles
+      await applyAudioState();
+
+      return true;
+    }
+
+    setStatus("waiting");
+    setWaitingText("Preparing cache…");
+    return false;
+  }
+
+  async function play() {
+    if (!ready) return;
+    await ensureVideoPlays();
+    await startAudioIfEnabled();
+  }
+
+  btnPlay.onclick = play;
+  btnPause.onclick = () => { v.pause(); try { a.pause(); } catch {} };
+
+  btnMute.onclick = async () => {
+    audioEnabled = !audioEnabled;
+    await applyAudioState();
+  };
+
+  v.addEventListener("timeupdate", sync);
+  v.addEventListener("seeking", () => {
+    if (!audioEnabled) return;
+    a.currentTime = v.currentTime;
+  });
+
+  // no "tap anywhere to unmute" logic
+  // attempt autoplay early (will succeed if policy allows; otherwise video may require user press Play)
+  (async () => {
+    updateMuteButton();
+    await checkOnce();
+    timer = setInterval(async () => {
+      if (await checkOnce()) clearInterval(timer);
+    }, POLL_MS);
+  })();
+  {% endraw %}
+  </script>
+</body>
+</html>
