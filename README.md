@@ -6,6 +6,8 @@ Inspired by [**Piped**](https://github.com/TeamPiped/Piped) and [**Invidious**](
 
 **DNT-YT prioritizes offline YouTube video exploration above everything else.** In fact, this is the only purpose of the source code in this repository.
 
+<img width="723" height="661" alt="Screenshot" src="https://github.com/user-attachments/assets/f553b642-2a31-47f6-be98-17e33c642cbb" />
+
 ## What it does
 
 * Accepts various YouTube URL formats (or a raw `video_id`)
