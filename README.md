@@ -111,8 +111,6 @@ Typical response:
 }
 ```
 
----
-
 ### Media (cached files)
 
 These URLs are browser-playable once caching completes.
