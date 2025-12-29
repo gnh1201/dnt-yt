@@ -1,2 +1,2 @@
-# dnt-yt
-DNT-YT Offline YouTube Cache Player
+# DNT-YT 
+DNT-YT(It means `Do Not Track me, YouTube`) is the offline YouTube cache player
