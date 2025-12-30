@@ -4,7 +4,7 @@ import mimetypes
 import logging
 from typing import Optional, Dict, Any
 
-from fastapi import FastAPI, Query, Request, HTTPException
+from fastapi import FastAPI, Path, Query, Request, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -16,7 +16,7 @@ from app.redis_client import get_redis
 from app.ytdlp_utils import extract_youtube_id, ytdlp_print_id
 from app.jobs import get_media, download_av_job
 
-VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
+VIDEO_ID_PATTERN = r"^[A-Za-z0-9_-]{10,14}$"
 
 setup_logging()
 logger = logging.getLogger("api")
@@ -210,16 +210,6 @@ def status(
     return JSONResponse(status_payload(vid))
 
 
-@app.get("/{video_id}", include_in_schema=False)
-async def watch_by_root_video_id(request: Request, video_id: str):
-    # Reject obvious non-video paths early
-    if not VIDEO_ID_RE.match(video_id):
-        raise HTTPException(status_code=404)
-
-    # Reuse existing watch page logic
-    return await watch_page(request, video_id)
-
-
 @app.get("/watch")
 async def watch_query(
     request: Request,
@@ -338,3 +328,8 @@ def oembed(
             "height": 315,
         }
     )
+
+@app.get("/{video_id}", include_in_schema=False)
+async def watch_by_root_video_id(request: Request, video_id: str = Path(..., pattern=VIDEO_ID_PATTERN)):
+    # Reuse existing watch page logic
+    return await watch_page(request, video_id)
