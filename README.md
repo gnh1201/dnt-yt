@@ -185,6 +185,11 @@ Then open:
 ## Use cases
 * [Preventing YouTube Tracking Links on ActivityPub Servers](https://github.com/gnh1201/activitypub/blob/main/youtube.md)
 
+## Disclaimer
+This software is licensed under the **GNU General Public License v3.0** and is provided **without any warranty**, to the extent permitted by applicable law. See the GPL v3.0 license for details.
+
+The authors and contributors shall not be held liable for any damages arising from the use of this software. Any illegal or unauthorized use is solely the responsibility of the user, who must ensure compliance with all applicable laws and regulations.
+
 ## Join the community
 I am always open. Collaboration, opportunities, and community activities are all welcome.
 
