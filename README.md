@@ -27,7 +27,7 @@ Inspired by [**Piped**](https://github.com/TeamPiped/Piped?utm_source=gnh1201) a
 * **API**: FastAPI
 * **Queue**: RQ
 * **Storage/State**: Redis (jobs/status) + local media volume
-* **Downloader**: yt-dlp (downloads audio/video separately; no ffmpeg required)
+* **Downloader**: yt-dlp (caching audio/video separately; no FFmpeg required)
 
 ## Endpoints
 
@@ -139,7 +139,7 @@ DNT-YT can decide response format based on request headers. Typical behavior:
 * If the client requests `application/json`, return JSON (status or play response)
 * (Optional) `oEmbed` / OpenGraph can be added for social previews
 
-## Playback model (no ffmpeg)
+## Playback model (no FFmpeg)
 
 DNT-YT downloads **audio and video separately** using yt-dlp and serves them as separate files.
 
@@ -149,7 +149,7 @@ The watch page:
 * uses a **Mute/Unmute toggle** button as the explicit user action to enable audio reliably
 * keeps audio aligned to video time (periodic drift correction and seek sync)
 
-This avoids any server-side muxing/merging and therefore avoids ffmpeg.
+This avoids any server-side muxing/merging and therefore avoids FFmpeg.
 
 ## Dependencies
 
@@ -178,7 +178,7 @@ Then open:
 * Offline-first YouTube exploration
 * Simple caching API
 * Browser-playable cached URLs
-* Minimal server-side processing (no ffmpeg)
+* Minimal server-side processing (no FFmpeg)
 
 **Non-goals**
 
