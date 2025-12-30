@@ -194,9 +194,9 @@ The following example shows a cache rule configuration based on [Cloudflare](htt
 ```text
 (http.request.full_uri wildcard "https://domain.tld/media/*/video")
 or
-(http.request.full_uri wildcard "https://domain.tld/media/*/audio")
+(http.request.full_uri wildcard r"https://domain.tld/media/*/audio")
 or
-(http.request.full_uri wildcard "https://domain.tld/media/*/thumbnail")
+(http.request.full_uri wildcard r"https://domain.tld/media/*/thumbnail")
 ```
 
 ## Use cases
