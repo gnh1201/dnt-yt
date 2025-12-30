@@ -192,7 +192,7 @@ For scenarios where a CDN is used for **long-distance data transfer**, it is rec
 The following example shows a cache rule configuration based on [Cloudflare](https://www.cloudflare.com/?utm_source=gnh1201):
 
 ```text
-(http.request.full_uri wildcard "https://domain.tld/media/*/video")
+(http.request.full_uri wildcard r"https://domain.tld/media/*/video")
 or
 (http.request.full_uri wildcard r"https://domain.tld/media/*/audio")
 or
