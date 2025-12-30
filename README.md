@@ -191,4 +191,4 @@ I am always open. Collaboration, opportunities, and community activities are all
 * ActivityPub [@catswords_oss@catswords.social](https://catswords.social/@catswords_oss?utm_source=gnh1201)
 * XMPP [catswords@conference.omemo.id](xmpp:catswords@conference.omemo.id?join)
 * [Join Catswords OSS on Microsoft Teams (teams.live.com)](https://teams.live.com/l/community/FEACHncAhq8ldnojAI?utm_source=gnh1201)
-* [Join Catswords OSS #welsonjs on Discord (discord.gg)](https://discord.gg/XKG5CjtXEj?utm_source=gnh1201)
+* [Join Catswords OSS #dnt-yt on Discord (discord.gg)](https://discord.gg/sZPCYDGWGM?utm_source=gnh1201)
