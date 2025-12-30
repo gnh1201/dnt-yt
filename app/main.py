@@ -16,10 +16,10 @@ from app.redis_client import get_redis
 from app.ytdlp_utils import extract_youtube_id, ytdlp_print_id
 from app.jobs import get_media, download_av_job
 
-VIDEO_ID_PATTERN = r"^[A-Za-z0-9_-]{10,14}$"
-
 setup_logging()
 logger = logging.getLogger("api")
+
+VIDEO_ID_REGEX = "^[A-Za-z0-9_-]{10,14}$"
 
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:58000")
 
@@ -274,7 +274,10 @@ def media_video(video_id: str):
 
     p = media["video_path"]
     mime, _ = mimetypes.guess_type(p)
-    return FileResponse(p, media_type=(mime or "application/octet-stream"), filename=os.path.basename(p))
+    headers = {
+        "Cache-Control": "public, max-age=3600, s-maxage=7776000",
+    }
+    return FileResponse(p, media_type=(mime or "application/octet-stream"), filename=os.path.basename(p), headers=headers)
 
 
 @app.get("/media/{video_id}/audio")
@@ -294,7 +297,10 @@ def media_audio(video_id: str):
 
     p = media["audio_path"]
     mime, _ = mimetypes.guess_type(p)
-    return FileResponse(p, media_type=(mime or "application/octet-stream"), filename=os.path.basename(p))
+    headers = {
+        "Cache-Control": "public, max-age=3600, s-maxage=7776000",
+    }
+    return FileResponse(p, media_type=(mime or "application/octet-stream"), filename=os.path.basename(p), headers=headers)
 
 
 @app.get("/oembed")
@@ -330,6 +336,6 @@ def oembed(
     )
 
 @app.get("/{video_id}", include_in_schema=False)
-async def watch_by_root_video_id(request: Request, video_id: str = Path(..., pattern=VIDEO_ID_PATTERN)):
+async def watch_by_root_video_id(request: Request, video_id: str = Path(..., pattern=VIDEO_ID_REGEX)):
     # Reuse existing watch page logic
     return await watch_page(request, video_id)
