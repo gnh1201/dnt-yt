@@ -2,7 +2,7 @@
 
 DNT-YT is a lightweight YouTube caching + offline browsing API.
 
-Inspired by [**Piped**](https://github.com/TeamPiped/Piped) and [**Invidious**](https://github.com/iv-org/invidious). However, their goals and typical use-cases differ from what I need, so I created **DNT-YT**.
+Inspired by [**Piped**](https://github.com/TeamPiped/Piped?utm_source=gnh1201) and [**Invidious**](https://github.com/iv-org/invidious?utm_source=gnh1201). However, their goals and typical use-cases differ from what I need, so I created **DNT-YT**.
 
 **DNT-YT prioritizes offline YouTube video exploration above everything else.** In fact, this is the only purpose of the source code in this repository.
 
@@ -37,7 +37,7 @@ If the cache is missing, the server should enqueue a caching job automatically, 
 #### 1) Root `/<video_id>`
 
 ```text
-/ DJgGTnHP0dY
+/DJgGTnHP0dY
 ```
 
 #### 2) Path-based watch
@@ -182,8 +182,19 @@ Then open:
 * Account features / subscriptions / comments
 * Complex transcoding pipelines
 
+## CDN Cache Rules
+For scenarios where a CDN is used for **long-distance data transfer**, it is recommended to configure appropriate cache rules to reduce bandwidth usage and improve performance.
+
+The following example shows a cache rule configuration based on [Cloudflare](https://www.cloudflare.com/?utm_source=gnh1201):
+
+```text
+(http.request.full_uri wildcard "https://domain.tld/media/*/video")
+or
+(http.request.full_uri wildcard "https://domain.tld/media/*/audio")
+```
+
 ## Use cases
-* [Preventing YouTube Tracking Links on ActivityPub Servers](https://github.com/gnh1201/activitypub/blob/main/youtube.md)
+* [Preventing YouTube Tracking Links on ActivityPub Servers](https://github.com/gnh1201/activitypub/blob/main/youtube.md?utm_source=gnh1201)
 
 ## Disclaimer
 This software is licensed under the **GNU General Public License v3.0** and is provided **without any warranty**, to the extent permitted by applicable law. See the GPL v3.0 license for details.
