@@ -20,7 +20,7 @@ Inspired by [**Piped**](https://github.com/TeamPiped/Piped?utm_source=gnh1201) a
   * polls cache status every 5 seconds when not ready
   * auto-plays video (muted) once ready
   * uses a **Mute/Unmute toggle** as the user gesture to enable audio
-  * keeps A/V synchronized in the browser (no ffmpeg)
+  * keeps A/V synchronized in the browser (no FFmpeg)
 
 ## Architecture
 
