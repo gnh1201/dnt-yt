@@ -37,25 +37,25 @@ If the cache is missing, the server should enqueue a caching job automatically, 
 #### 1) Root `/<video_id>`
 
 ```text
-/DJgGTnHP0dY
+/wLp_c3M-nPA
 ```
 
 #### 2) Path-based watch
 
 ```text
-/watch/DJgGTnHP0dY
+/watch/wLp_c3M-nPA
 ```
 
 #### 3) Query `v=<video_id>` (YouTube-like)
 
 ```text
-/watch?v=DJgGTnHP0dY
+/watch?v=wLp_c3M-nPA
 ```
 
 #### 4) Query `url=<full-youtube-url>`
 
 ```text
-/watch?url=https://www.youtube.com/watch?v=DJgGTnHP0dY
+/watch?url=https://www.youtube.com/watch?v=wLp_c3M-nPA
 ```
 
 ### API (JSON)
@@ -71,7 +71,7 @@ GET /v1/yt/play?url=<youtube_url>
 Example:
 
 ```bash
-curl "http://localhost:58000/v1/yt/play?url=https://www.youtube.com/watch?v=DJgGTnHP0dY"
+curl "http://localhost:58000/v1/yt/play?url=https://www.youtube.com/watch?v=wLp_c3M-nPA"
 ```
 
 Typical response:
@@ -80,7 +80,7 @@ Typical response:
 {
   "ok": true,
   "ready": false,
-  "video_id": "DJgGTnHP0dY",
+  "video_id": "wLp_c3M-nPA",
   "job_id": "..."
 }
 ```
@@ -96,7 +96,7 @@ GET /v1/yt/status?video_id=<video_id>
 Example:
 
 ```bash
-curl "http://localhost:58000/v1/yt/status?video_id=DJgGTnHP0dY"
+curl "http://localhost:58000/v1/yt/status?video_id=wLp_c3M-nPA"
 ```
 
 Typical response:
@@ -105,9 +105,9 @@ Typical response:
 {
   "ok": true,
   "ready": true,
-  "video_id": "DJgGTnHP0dY",
-  "video_url": "/media/DJgGTnHP0dY/video.mp4",
-  "audio_url": "/media/DJgGTnHP0dY/audio.m4a"
+  "video_id": "wLp_c3M-nPA",
+  "video_url": "/media/wLp_c3M-nPA/video.mp4",
+  "audio_url": "/media/wLp_c3M-nPA/audio.m4a"
 }
 ```
 
@@ -123,8 +123,8 @@ GET /media/<video_id>/audio.m4a
 Example:
 
 ```text
-/media/DJgGTnHP0dY/video.mp4
-/media/DJgGTnHP0dY/audio.m4a
+/media/wLp_c3M-nPA/video.mp4
+/media/wLp_c3M-nPA/audio.m4a
 ```
 
 ## Content negotiation (HTML vs JSON)
@@ -164,7 +164,7 @@ docker compose up --build
 
 Then open:
 
-* Watch page: `http://localhost:58000/DJgGTnHP0dY`
+* Watch page: `http://localhost:58000/wLp_c3M-nPA`
 * API: `http://localhost:58000/v1/yt/play?url=...`
 
 ## Goals / non-goals
@@ -198,9 +198,7 @@ or
 ## Use cases
 * [Preventing YouTube Tracking Links on ActivityPub Servers](https://github.com/gnh1201/activitypub/blob/main/youtube.md?utm_source=gnh1201)
 
-## My test playlist
-* https://dnt-yt.catswords.net/cYlB3dN-udY (PINGU Havana)
-* https://dnt-yt.catswords.net/qm4x4B_ndi8 (Wedding Peach, Animation)
+## My test videos
 * https://dnt-yt.catswords.net/wLp_c3M-nPA (VHS Visual Doctor)
 
 ## Disclaimer
