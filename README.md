@@ -205,6 +205,7 @@ or
 ## My test videos
 * https://dnt-yt.catswords.net/wLp_c3M-nPA (SKC VHS Visual Doctor)
 * https://dnt-yt.catswords.net/kvAfmYNtugQ (Dolby Atmos Sample Video)
+* https://dnt-yt.catswords.net/mkggXE5e2yk (LG TV Sample Video)
 
 ## Disclaimer
 This software is licensed under the **GNU General Public License v3.0** and is provided **without any warranty**, to the extent permitted by applicable law. See the GPL v3.0 license for details.
