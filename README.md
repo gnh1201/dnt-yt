@@ -1,5 +1,7 @@
 # DNT-YT
 
+[![Discord chat](https://img.shields.io/discord/359930650330923008?logo=discord)](https://discord.gg/sZPCYDGWGM?utm_source=gnh1201)
+
 DNT-YT is a lightweight YouTube caching + offline browsing API.
 
 Inspired by [**Piped**](https://github.com/TeamPiped/Piped?utm_source=gnh1201) and [**Invidious**](https://github.com/iv-org/invidious?utm_source=gnh1201). However, their goals and typical use-cases differ from what I need, so I created **DNT-YT**.
