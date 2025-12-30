@@ -203,7 +203,7 @@ or
 * [Preventing YouTube Tracking Links on ActivityPub Servers](https://github.com/gnh1201/activitypub/blob/main/youtube.md?utm_source=gnh1201)
 
 ## My test videos
-* https://dnt-yt.catswords.net/wLp_c3M-nPA (VHS Visual Doctor)
+* https://dnt-yt.catswords.net/wLp_c3M-nPA (SKC VHS Visual Doctor)
 
 ## Disclaimer
 This software is licensed under the **GNU General Public License v3.0** and is provided **without any warranty**, to the extent permitted by applicable law. See the GPL v3.0 license for details.
