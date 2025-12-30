@@ -5,11 +5,13 @@ import logging
 from typing import Optional, Dict, Any
 
 from fastapi import FastAPI, Path, Query, Request, HTTPException
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import Response, JSONResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
 from rq import Queue
+
+import httpx
 
 from app.logging_config import setup_logging
 from app.redis_client import get_redis
@@ -19,7 +21,29 @@ from app.jobs import get_media, download_av_job
 setup_logging()
 logger = logging.getLogger("api")
 
+# YouTube video ID validation
 VIDEO_ID_REGEX = "^[A-Za-z0-9_-]{10,14}$"
+
+# Candidate thumbnail filenames to try.
+# Earlier items are expected to have higher resolution/quality.
+POSSIBLE_THUMBNAILS = [
+    "maxresdefault.jpg",
+    "hq720.jpg",
+    "sddefault.jpg",
+    "hqdefault.jpg",
+    "mqdefault.jpg",
+    "default.jpg",
+    "0.jpg", "1.jpg", "2.jpg", "3.jpg",
+]
+
+# Strong cache hints for browsers and CDNs
+CACHE_HEADERS = {
+    "Cache-Control": "public, max-age=31536000, immutable"
+}
+
+# Media storage root (shared with video/audio cache)
+MEDIA_ROOT = os.environ.get("MEDIA_ROOT", "media")
+os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:58000")
 
@@ -274,10 +298,7 @@ def media_video(video_id: str):
 
     p = media["video_path"]
     mime, _ = mimetypes.guess_type(p)
-    headers = {
-        "Cache-Control": "public, max-age=3600, s-maxage=7776000",
-    }
-    return FileResponse(p, media_type=(mime or "application/octet-stream"), filename=os.path.basename(p), headers=headers)
+    return FileResponse(p, media_type=(mime or "application/octet-stream"), filename=os.path.basename(p), headers=CACHE_HEADERS)
 
 
 @app.get("/media/{video_id}/audio")
@@ -297,10 +318,58 @@ def media_audio(video_id: str):
 
     p = media["audio_path"]
     mime, _ = mimetypes.guess_type(p)
-    headers = {
-        "Cache-Control": "public, max-age=3600, s-maxage=7776000",
-    }
-    return FileResponse(p, media_type=(mime or "application/octet-stream"), filename=os.path.basename(p), headers=headers)
+    return FileResponse(p, media_type=(mime or "application/octet-stream"), filename=os.path.basename(p), headers=CACHE_HEADERS)
+
+
+@app.get("/media/{video_id}/thumbnail", include_in_schema=False)
+async def thumbnail(
+    # Validate video_id at the routing level using Path + regex
+    video_id: str = Path(..., pattern=VIDEO_ID_REGEX),
+):
+    # Local thumbnail cache path (single best thumbnail per video)
+    thumb_path = os.path.join(MEDIA_ROOT, f"{video_id}.thumb.jpg")
+
+    # 1) Local cache hit: serve immediately
+    if os.path.exists(thumb_path):
+        with open(thumb_path, "rb") as f:
+            return Response(
+                f.read(),
+                media_type="image/jpeg",
+                headers=CACHE_HEADERS,
+            )
+
+    # Base URL for YouTube thumbnail assets
+    base_url = f"https://i.ytimg.com/vi/{video_id}"
+
+    # 2) Try possible thumbnails in order and cache the first successful one
+    async with httpx.AsyncClient(timeout=10, follow_redirects=True) as client:
+        for name in POSSIBLE_THUMBNAILS:
+            url = f"{base_url}/{name}"
+            try:
+                r = await client.get(url)
+                if r.status_code != 200:
+                    continue
+
+                # Save to local cache
+                with open(thumb_path, "wb") as f:
+                    f.write(r.content)
+
+                return Response(
+                    r.content,
+                    media_type="image/jpeg",
+                    headers=CACHE_HEADERS,
+                )
+            except httpx.HTTPError as e:
+                # Not a fatal error: move on to the next thumbnail candidate
+                logger.info(
+                    "Thumbnail not available, trying next candidate: %s (%s)",
+                    url,
+                    e,
+                )
+                continue
+
+    # No thumbnail was found
+    raise HTTPException(status_code=404)
 
 
 @app.get("/oembed")
