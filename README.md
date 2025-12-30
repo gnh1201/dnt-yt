@@ -182,6 +182,9 @@ Then open:
 * Account features / subscriptions / comments
 * Complex transcoding pipelines
 
+## Use cases
+* [Preventing YouTube Tracking Links on ActivityPub Servers](https://github.com/gnh1201/activitypub/blob/main/youtube.md)
+
 ## Join the community
 I am always open. Collaboration, opportunities, and community activities are all welcome.
 
