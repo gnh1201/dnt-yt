@@ -106,8 +106,8 @@ Typical response:
   "ok": true,
   "ready": true,
   "video_id": "wLp_c3M-nPA",
-  "video_url": "/media/wLp_c3M-nPA/video.mp4",
-  "audio_url": "/media/wLp_c3M-nPA/audio.m4a"
+  "video_url": "/media/wLp_c3M-nPA/video",
+  "audio_url": "/media/wLp_c3M-nPA/audio",
 }
 ```
 
@@ -116,15 +116,17 @@ Typical response:
 These URLs are browser-playable once caching completes.
 
 ```text
-GET /media/<video_id>/video.mp4
-GET /media/<video_id>/audio.m4a
+GET /media/<video_id>/video
+GET /media/<video_id>/audio
+GET /media/<video_id>/thumbnail  # thumbnail image
 ```
 
 Example:
 
 ```text
-/media/wLp_c3M-nPA/video.mp4
-/media/wLp_c3M-nPA/audio.m4a
+/media/wLp_c3M-nPA/video
+/media/wLp_c3M-nPA/audio
+/media/wLp_c3M-nPA/thumbnail  # thumbnail image
 ```
 
 ## Content negotiation (HTML vs JSON)
