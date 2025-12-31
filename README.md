@@ -4,6 +4,8 @@
 
 DNT-YT (Do-Not-Track YouTube) is a lightweight YouTube caching + offline browsing API.
 
+![DNT-YT structure overview](app/static/overview.png)  
+
 Inspired by [**Piped**](https://github.com/TeamPiped/Piped?utm_source=gnh1201) and [**Invidious**](https://github.com/iv-org/invidious?utm_source=gnh1201). However, their goals and typical use-cases differ from what I need, so I created **DNT-YT**.
 
 **DNT-YT prioritizes offline YouTube video exploration above everything else.** In fact, this is the only purpose of the source code in this repository.
