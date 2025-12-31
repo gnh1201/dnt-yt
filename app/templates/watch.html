@@ -264,6 +264,9 @@
   const a = document.getElementById("audio");
   const waiting = document.getElementById("waiting");
 
+  // We'll enable controls after we attach tracks (subtitles)
+  v.controls = false;
+
   function applyWaitingThumbnail() {
     try {
       var thumbUrl = "/media/" + encodeURIComponent(VIDEO_ID) + "/thumbnail";
@@ -290,6 +293,7 @@
   let ready = false;
   let timer = null;
   let audioEnabled = false;
+  let subtitlesAttached = false;
 
   function setStatus(s) {
     statusRight.textContent = "status: " + s;
@@ -322,15 +326,90 @@
     }
   }
 
+  function clearTracks() {
+    try {
+      var tracks = v.querySelectorAll("track");
+      for (var i = 0; i < tracks.length; i++) tracks[i].remove();
+    } catch {}
+  }
+
+  async function attachSubtitlesOnce() {
+    if (subtitlesAttached) return;
+    subtitlesAttached = true;
+
+    clearTracks();
+
+    // List available subtitle languages (expects JSON: { subtitles: ["en","ko", ...] })
+    var langs = [];
+    try {
+      var r = await fetch("/media/" + encodeURIComponent(VIDEO_ID) + "/subtitles");
+      if (r && r.ok) {
+        var data = await r.json();
+        if (data && data.subtitles && data.subtitles.length) langs = data.subtitles;
+      }
+    } catch {}
+
+    if (!langs || !langs.length) {
+      // Still enable controls even if there are no subtitles
+      v.controls = true;
+      return;
+    }
+
+    // Add <track> elements BEFORE enabling controls (CC menu stability)
+    for (var j = 0; j < langs.length; j++) {
+      var lang = langs[j];
+      var t = document.createElement("track");
+      t.kind = "subtitles";
+      t.srclang = lang;
+      t.label = lang;
+      t.src = "/media/" + encodeURIComponent(VIDEO_ID) + "/subtitles/" + encodeURIComponent(lang);
+      v.appendChild(t);
+    }
+
+    // Enable native controls after tracks are present
+    v.controls = true;
+
+    // Choose a default track (ko -> en -> first)
+    function pickDefault() {
+      try {
+        if (!v.textTracks || !v.textTracks.length) return;
+
+        // disable all
+        for (var i = 0; i < v.textTracks.length; i++) v.textTracks[i].mode = "disabled";
+
+        var preferred = null;
+        for (var k = 0; k < langs.length; k++) if (langs[k] === "ko") preferred = "ko";
+        if (!preferred) for (var k2 = 0; k2 < langs.length; k2++) if (langs[k2] === "en") preferred = "en";
+        if (!preferred) preferred = langs[0];
+
+        for (var i2 = 0; i2 < v.textTracks.length; i2++) {
+          var tt = v.textTracks[i2];
+          if (tt && tt.language === preferred) {
+            tt.mode = "showing";
+            break;
+          }
+        }
+      } catch {}
+    }
+
+    v.addEventListener("loadedmetadata", pickDefault, { once: true });
+    setTimeout(pickDefault, 150);
+  }
+
   async function checkOnce() {
     const s = await fetchStatus();
     if (s && s.ready) {
       ready = true;
       attach(s.video_url, s.audio_url);
+
+      // Attach subtitles before showing the video/controls
+      await attachSubtitlesOnce();
+
       waiting.style.display = "none";
       v.style.display = "block";
       setBadge("Cache ready", true);
       setStatus("ready");
+
       try { await v.play(); } catch {}
       return true;
     }

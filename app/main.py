@@ -21,8 +21,9 @@ from app.jobs import get_media, download_av_job
 setup_logging()
 logger = logging.getLogger("api")
 
-# YouTube video ID validation
+# Input validation
 VIDEO_ID_REGEX = "^[A-Za-z0-9_-]{10,14}$"
+LANG_REGEX = r"^[a-z]{2}(-[A-Z]{2})?$"
 
 # Candidate thumbnail filenames to try.
 # Earlier items are expected to have higher resolution/quality.
@@ -321,7 +322,7 @@ def media_audio(video_id: str):
     return FileResponse(p, media_type=(mime or "application/octet-stream"), filename=os.path.basename(p), headers=CACHE_HEADERS)
 
 
-@app.get("/media/{video_id}/thumbnail", include_in_schema=False)
+@app.get("/media/{video_id}/thumbnail")
 async def thumbnail(
     # Validate video_id at the routing level using Path + regex
     video_id: str = Path(..., pattern=VIDEO_ID_REGEX),
@@ -370,6 +371,42 @@ async def thumbnail(
 
     # No thumbnail was found
     raise HTTPException(status_code=404)
+
+
+@app.get("/media/{video_id}/subtitles")
+async def list_subtitles(
+    video_id: str = Path(..., pattern=VIDEO_ID_REGEX),
+):
+    # Match: {video_id}.video.{lang}.vtt
+    pat = re.compile(rf"^{re.escape(video_id)}\.video\.({LANG_REGEX[1:-1]})\.vtt$")
+
+    if not os.path.isdir(MEDIA_ROOT):
+        raise HTTPException(status_code=404)
+
+    langs = []
+    for name in os.listdir(MEDIA_ROOT):
+        m = pat.match(name)
+        if m:
+            langs.append(m.group(1))
+
+    langs = sorted(set(langs))
+    return {"video_id": video_id, "subtitles": langs}
+
+
+@app.get("/media/{video_id}/subtitles/{lang}")
+async def media_subtitle_by_lang(
+    video_id: str = Path(..., pattern=VIDEO_ID_REGEX),
+    lang: str = Path(..., pattern=r"^[a-z]{2}(-[A-Z]{2})?$"),
+):
+    path = os.path.join(MEDIA_ROOT, f"{video_id}.video.{lang}.vtt")
+    if not os.path.isfile(path):
+        raise HTTPException(status_code=404)
+
+    return FileResponse(
+        path,
+        media_type="text/vtt; charset=utf-8",
+        filename=os.path.basename(path),
+    )
 
 
 @app.get("/oembed")

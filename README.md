@@ -14,13 +14,14 @@ Inspired by [**Piped**](https://github.com/TeamPiped/Piped?utm_source=gnh1201) a
 
 * Accepts various YouTube URL formats (or a raw `video_id`)
 * Automatically requests caching when missing
-* Stores cached media (video/audio and thumbnail) and serves them as browser-playable URLs
+* Stores cached media (video/audio, thumbnail and subtitles) and serves them as browser-playable URLs
 * Serves an HTML watch page that:
 
   * polls cache status every 5 seconds when not ready
   * auto-plays video (muted) once ready
   * uses a **Mute/Unmute toggle** as the user gesture to enable audio
   * keeps A/V synchronized in the browser (no FFmpeg)
+  * Supports thumbnails and subtitles
 
 ## Architecture
 

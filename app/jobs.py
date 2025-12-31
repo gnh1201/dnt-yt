@@ -145,6 +145,10 @@ def download_av_job(video_id: str) -> Dict[str, Any]:
     video_args = common + [
         "-f", video_format,
         "-o", video_tpl,
+        "--write-subs",
+        "--write-auto-subs",
+        "--sub-format", "vtt",
+        "--output-na-placeholder", "\"\"",
         watch_url,
     ]
 
