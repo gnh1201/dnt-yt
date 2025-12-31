@@ -122,6 +122,8 @@ These URLs are browser-playable once caching completes.
 GET /media/<video_id>/video
 GET /media/<video_id>/audio
 GET /media/<video_id>/thumbnail  # thumbnail image
+GET /media/<video_id>/subtitles  # the list of all subtitles
+GET /media/<video_id>/subtitles/<lang>  # subtitles (vtt format)
 ```
 
 Example:
@@ -130,6 +132,8 @@ Example:
 /media/wLp_c3M-nPA/video
 /media/wLp_c3M-nPA/audio
 /media/wLp_c3M-nPA/thumbnail  # thumbnail image
+/media/wLp_c3M-nPA/subtitles  # the list of all subtitles
+/media/wLp_c3M-nPA/subtitles/en  # subtitles (vtt format)
 ```
 
 ## Content negotiation (HTML vs JSON)
