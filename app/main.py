@@ -396,7 +396,7 @@ async def list_subtitles(
 @app.get("/media/{video_id}/subtitles/{lang}")
 async def media_subtitle_by_lang(
     video_id: str = Path(..., pattern=VIDEO_ID_REGEX),
-    lang: str = Path(..., pattern=r"^[a-z]{2}(-[A-Z]{2})?$"),
+    lang: str = Path(..., pattern=LANG_REGEX),
 ):
     path = os.path.join(MEDIA_ROOT, f"{video_id}.video.{lang}.vtt")
     if not os.path.isfile(path):

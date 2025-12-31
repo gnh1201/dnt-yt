@@ -368,32 +368,6 @@
 
     // Enable native controls after tracks are present
     v.controls = true;
-
-    // Choose a default track (ko -> en -> first)
-    function pickDefault() {
-      try {
-        if (!v.textTracks || !v.textTracks.length) return;
-
-        // disable all
-        for (var i = 0; i < v.textTracks.length; i++) v.textTracks[i].mode = "disabled";
-
-        var preferred = null;
-        for (var k = 0; k < langs.length; k++) if (langs[k] === "ko") preferred = "ko";
-        if (!preferred) for (var k2 = 0; k2 < langs.length; k2++) if (langs[k2] === "en") preferred = "en";
-        if (!preferred) preferred = langs[0];
-
-        for (var i2 = 0; i2 < v.textTracks.length; i2++) {
-          var tt = v.textTracks[i2];
-          if (tt && tt.language === preferred) {
-            tt.mode = "showing";
-            break;
-          }
-        }
-      } catch {}
-    }
-
-    v.addEventListener("loadedmetadata", pickDefault, { once: true });
-    setTimeout(pickDefault, 150);
   }
 
   async function checkOnce() {
